@@ -14,13 +14,13 @@ global _start
 
 _start:
     
-    call Q1
-    call Q2
-    call Q3
-    call Q4
-    call Q5
+    call    Q1
+    call    Q2
+    call    Q3
+    call    Q4
+    call    Q5
     
-    call sysquit
+    call    sysquit
 
 
 Q1:
@@ -74,9 +74,9 @@ Q3INVRT:
     je      Q3FIM               ; caso sim, terminar
     mov     al,    [frase+ecx]  ; mov [Q3MSG+ebx], [frase+ecx] nao pode ser feito diretamente, portanto
     mov     [inv+ebx], al       ; utilizamos al como buffer para realizar essa troca, um byte por vez
-    inc ebx                     ; proximo caractere a ser colocado na string a imprimir
-    dec ecx                     ; caractere anterior a ser lido da string normal
-    jmp Q3INVRT
+    inc     ebx                 ; proximo caractere a ser colocado na string a imprimir
+    dec     ecx                 ; caractere anterior a ser lido da string normal
+    jmp     Q3INVRT
 
 Q3FIM:
     mov     eax,    inv
@@ -105,7 +105,7 @@ Q4IGUAL:
     
 Q4FIM:
     mov     eax,    concat
-    call strecho
+    call    strecho
     ret
 
 
