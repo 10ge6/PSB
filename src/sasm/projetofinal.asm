@@ -8,6 +8,7 @@ section .bss
     msg resb 41
     inv resb 41
     concat resb 41
+    caps resb 41
     
 section .text
 global CMAIN
@@ -19,6 +20,7 @@ CMAIN:
     call Q2
     call Q3
     call Q4
+    call Q5
     
     ret
     
@@ -41,25 +43,25 @@ Q2:
     mov     edi,    msg         ; e seu pointer
     mov     al,     'a'         ; compararemos primeiro contra 'a'
     
-DENOVOA:
+Q2DENOVOA:
     repne   scasb               ; percorre a string (repne termina quando ECX = 0; scasb le de EDI e compara contra EAX,
                                 ; muda EDI considerando DF.ZF = 0 quando a comparacao e diferente! por isso que caso exista
                                 ; a possibilidade da string terinar com o caractere sendo procurado, deve haver um jcxz antes
                                 ; do ultimo jmp; evitar um loop infinito)
-    jne     CONT                ; ; jump caso ZF = 0 (neste caso seria ate possivel fazer o contrario e so ter jcxz aqui)
+    jne     Q2CONT                ; ; jump caso ZF = 0 (neste caso seria ate possivel fazer o contrario e so ter jcxz aqui)
     inc     bl                  ; bl e utilizado como counter de 'a's
-    jmp     DENOVOA
+    jmp     Q2DENOVOA
     
-CONT:
+Q2CONT:
     mov     al,     'm'
     mov     edi,    msg
     mov     ecx,    41
     
-DENOVOM:
+Q2DENOVOM:
     repne   scasb
     jne     Q2FIM
     inc     bh                  ; bh e utilizado como counter de 'm's
-    jmp     DENOVOM
+    jmp     Q2DENOVOM
     
 Q2FIM:
     PRINT_DEC 1,    bl
@@ -96,18 +98,68 @@ Q4INICIO:
     cmp     ecx,    41          ; checar se no fim da string origem
     je      Q4FIM
     cmp     [msg+ecx], byte 20h ; char ' '?
-    je      IGUAL
+    je      Q4IGUAL
     mov     al,    [msg+ecx]    ; mesma ideia, utilizar
     mov     [concat+ebx], al    ; registrador como buffer
     inc     ebx                 ; incrementar
     inc     ecx                 ; indices
     jmp     Q4INICIO
     
-IGUAL:
+Q4IGUAL:
     inc     ecx                 ; pular whitespace
     jmp     Q4INICIO
     
 Q4FIM:
     PRINT_STRING concat
+    NEWLINE
+    ret
+    
+    
+Q5:
+    xor     ecx,    ecx
+    xor     ebx,    ebx
+    
+Q5UPPER:
+    cmp     ecx,    41
+    je      Q5FIM
+    cmp     [msg+ecx], byte 20h ; char ' '?
+    je      Q5PULARESPACOU
+    mov     al,     [msg+ecx]
+    sub     al,     32
+    mov     [caps+ecx],   al
+    inc     ecx
+    inc     ebx
+    cmp     ebx,    2
+    jne     Q5UPPER
+    xor     ebx,    ebx
+    
+Q5LOWER:
+    cmp     ecx,    41
+    je      Q5FIM
+    cmp     [msg+ecx], byte 20h
+    je      Q5PULARESPACOL
+    mov     al,     [msg+ecx]
+    mov     [caps+ecx],   al
+    inc     ecx
+    inc     ebx
+    cmp     ebx,    3
+    jne     Q5LOWER
+    xor     ebx,    ebx
+    jmp     Q5UPPER
+    
+Q5PULARESPACOU:
+    mov     al,     [msg+ecx]
+    mov     [caps+ecx],   al
+    inc     ecx
+    jmp     Q5UPPER
+    
+Q5PULARESPACOL:
+    mov     al,     [msg+ecx]
+    mov     [caps+ecx],   al
+    inc     ecx
+    jmp     Q5LOWER
+    
+Q5FIM:
+    PRINT_STRING caps
     NEWLINE
     ret
