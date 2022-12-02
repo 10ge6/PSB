@@ -2,121 +2,112 @@
 section .data
 
     frase db "Qual e a importancia da escola na democratizacao da sociedade", 0h
-
+    
 section .bss
 
-    R1 resb 36
-    A resb 5
-    M resb 5
-    R4 resb 36
-    MSG resb 36
-
+    msg resb 41
+    inv resb 41
+    concat resb 41
+    
 section .text
 global CMAIN
 CMAIN:
+
     mov ebp, esp; for correct debugging
+    
     call Q1
     call Q2
     call Q3
     call Q4
     
     ret
-
+    
+    
 Q1:
-    mov esi, frase + 7
-    mov ecx, 41
-    mov edi, R1
-    cld
-    rep movsb
-    PRINT_STRING R1
+    mov esi, frase + 7         ; offset para comecar em "a importancia..."
+    mov ecx, 41                ; comprimento ate "democratizacao"
+    mov edi, msg               ; comecar a copiar string no endereco msg
+    cld                        ; garantir DF em estado correto
+    rep movsb                  ; passar parte desejada da string
+    PRINT_STRING msg
     NEWLINE
-ret
+    ret
+    
     
 Q2:
-    xor     eax,    eax
-    xor     ebx,    ebx
-    xor     ecx,    ecx
-    xor     edx,    edx
-    mov     ecx,    41
-    mov     edi,    R1
-    mov     al,     'a'
-    cld
-
+    xor     eax,    eax         ; zerar registradores ainda
+    xor     ebx,    ebx         ; nao utilizados no programa
+    mov     ecx,    41          ; mesmo setup: comprimento de msg
+    mov     edi,    msg         ; e seu pointer
+    mov     al,     'a'         ; compararemos primeiro contra 'a'
+    
 DENOVOA:
-    repne   scasb
-    JNE     CONT
-    INC     bl
-    JMP     DENOVOA
-
+    repne   scasb               ; percorre a string (repne termina quando ECX = 0; scasb le de EDI e compara contra EAX,
+                                ; muda EDI considerando DF.ZF = 0 quando a comparacao e diferente! por isso que caso exista
+                                ; a possibilidade da string terinar com o caractere sendo procurado, deve haver um jcxz antes
+                                ; do ultimo jmp; evitar um loop infinito)
+    jne     CONT                ; ; jump caso ZF = 0 (neste caso seria ate possivel fazer o contrario e so ter jcxz aqui)
+    inc     bl                  ; bl e utilizado como counter de 'a's
+    jmp     DENOVOA
+    
 CONT:
     mov     al,     'm'
-    mov     edi,    R1
+    mov     edi,    msg
     mov     ecx,    41
-
+    
 DENOVOM:
     repne   scasb
-    JNE     Q2FIM
-    INC     bh
-    JMP     DENOVOM
-
+    jne     Q2FIM
+    inc     bh                  ; bh e utilizado como counter de 'm's
+    jmp     DENOVOM
+    
 Q2FIM:
     PRINT_DEC 1,    bl
     NEWLINE
     PRINT_DEC 1,    bh
     NEWLINE
     ret
-
-
+    
+    
 Q3:
-    xor     eax,    eax
-    xor     ebx,    ebx
-    xor     ecx,    ecx
-    mov     ecx,    47      ; fim da string
-
+    xor     ebx,    ebx         ; zerar ebx para poder usar como incremento ao criar a string inversa
+    mov     ecx,    47          ; fim da string (ultimo 'o')
+    
 Q3INICIO:
-    cmp     ecx,    6       ; (comeco da string - 1, o espaco antes do primeiro 'a')
-    je      Q3FIM
-                                ; mov [Q3MSG+ebx], [frase+ecx] nao pode ser feito diretamente
-    mov     eax,    [frase+ecx] ; portanto utilizamos eax como buffer
-    mov     [MSG+ebx],  eax     ; para realizar a troca em duas partes
-    inc ebx
-    dec ecx
+    cmp     ecx,    6           ; checar se estamos no comeco da string - 1 (o espaco antes do primeiro 'a')
+    je      Q3FIM               ; caso sim, terminar
+    mov     al,    [frase+ecx]  ; mov [Q3MSG+ebx], [frase+ecx] nao pode ser feito diretamente, portanto
+    mov     [inv+ebx],  al      ; utilizamos al como buffer para realizar essa troca, um byte por vez
+    inc ebx                     ; proximo caractere a ser colocado na string a imprimir
+    dec ecx                     ; caractere anterior a ser lido da string normal
     jmp Q3INICIO
-
+    
 Q3FIM:
-    mov     eax,    0       ; nao zerando o final de Q3MSG, por algum motivo(?) o comeco
-    mov     [MSG+ebx],  eax ; da string aparece no final de Q3MSG (na direcao normal)
-    PRINT_STRING MSG
+    PRINT_STRING inv
     NEWLINE
     ret
-
+    
+    
 Q4:
-    xor     eax,    eax
-    xor     ebx,    ebx
-    xor     ecx,    ecx
-    xor     edx,    edx
-    mov     edx,    20h
+    xor     ebx,    ebx         ; zerar para utilizar como counter de indice
+    xor     ecx,    ecx         ; das strings origem e concatenada
+    
 Q4INICIO:
-    cmp     ecx,    41
+    cmp     ecx,    41          ; checar se no fim da string origem
     je      Q4FIM
-    
-    cmp     [R1 + ecx],  edx  
-    je      Igual
-    
-    mov     eax,    [R1 + ecx]
-    mov     [R4 + ebx], eax
-    inc     ebx
-    inc     ecx
-    jmp     Q4INICIO     
-Igual:
-    inc     ecx
+    cmp     [msg+ecx], byte 20h ; char ' '?
+    je      IGUAL
+    mov     al,    [msg+ecx]    ; mesma ideia, utilizar
+    mov     [concat+ebx], al    ; registrador como buffer
+    inc     ebx                 ; incrementar
+    inc     ecx                 ; indices
     jmp     Q4INICIO
-
+    
+IGUAL:
+    inc     ecx                 ; pular whitespace
+    jmp     Q4INICIO
+    
 Q4FIM:
-    mov     eax,    0       ; nao zerando o final de Q3MSG, por algum motivo(?) o comeco
-    mov     [R4+ebx],  eax ; da string aparece no final de Q3MSG (na direcao normal)
-    PRINT_STRING R4
+    PRINT_STRING concat
     NEWLINE
     ret
-
-   
