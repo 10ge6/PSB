@@ -9,11 +9,11 @@ section .bss
 
     msg resb 41
     inv resb 41
-    concat resb 41
+    concat resb 36
     caps resb 41
-    numeros resb 41
-    letra resb 41
-    numero resb 41
+    numeros resb 36
+    sorted resb 36
+    indice resw 1
     
 section .text
 global CMAIN
@@ -27,6 +27,7 @@ CMAIN:
     call Q4
     call Q5
     call Q6
+    call Q7
     
     ret
     
@@ -54,7 +55,7 @@ Q2DENOVOA:
                                 ; muda EDI considerando DF.ZF = 0 quando a comparacao e diferente! por isso que caso exista
                                 ; a possibilidade da string terinar com o caractere sendo procurado, deve haver um jcxz antes
                                 ; do ultimo jmp; evitar um loop infinito)
-    jne     Q2CONT                ; ; jump caso ZF = 0 (neste caso seria ate possivel fazer o contrario e so ter jcxz aqui)
+    jne     Q2CONT              ; jump caso ZF = 0 (neste caso seria ate possivel fazer o contrario e so ter jcxz aqui)
     inc     bl                  ; bl e utilizado como counter de 'a's
     jmp     Q2DENOVOA
     
@@ -169,37 +170,75 @@ Q5FIM:
     PRINT_STRING caps
     NEWLINE
     ret
-
+    
+    
 Q6:
-   xor ebx, ebx
-   xor ecx, ecx
+   xor      ebx,    ebx
+   xor      ecx,    ecx
    
 Q6INICIO:
-   cmp ecx, 41
-   je Q6FIM
-   cmp [msg + ecx], byte 20h
-   jne Q6MEIO
-   inc ecx
-   jmp Q6INICIO
+   cmp      ecx,    41
+   je       Q6FIM
+   cmp      [msg + ecx], byte 20h
+   jne      Q6MEIO
+   inc      ecx
+   jmp      Q6INICIO
 
 Q6MEIO:
-   mov al, [msg + ecx]
-   sub al, 96
-   mov [numeros+ebx],al
-   inc ebx
+   mov      al,     [msg + ecx]
+   sub      al,     96
+   mov      [numeros+ebx], al
+   inc      ebx
    PRINT_CHAR [msg + ecx]
    PRINT_CHAR " "
    PRINT_CHAR "-"
    PRINT_CHAR ">"
    PRINT_CHAR " "
-   PRINT_DEC 1, al
+   PRINT_DEC 1,     al
    NEWLINE
-   inc ecx
-   jmp Q6INICIO
+   inc      ecx
+   jmp      Q6INICIO
    
 Q6FIM:
    ret    
-        
-                
+    
+    
 Q7:
-    xor eax,eax
+    xor     ebx,    ebx
+    mov     ecx,    36
+    jmp     Q7SORT
+    
+Q7SORT:
+    xor     eax,    eax
+    xor     edx,    edx
+Q7STRITER:
+    cmp     edx,    ecx
+    je      Q7SETMAX
+    mov     bl,     [numeros+edx]
+    cmp     bl,     al
+    jg      Q7SETBUF
+Q7AFTERSET:
+    inc     edx
+    jmp     Q7STRITER
+    
+Q7SETBUF:
+    mov     al,     bl
+    mov     [indice], edx
+    ;PRINT_DEC 1, [indice]
+    jmp     Q7AFTERSET
+    
+Q7SETMAX:
+    mov     [sorted+ecx], al
+    mov     edx,    [indice]
+    mov     al,     [numeros+ecx]
+    mov     [numeros+edx], al
+    PRINT_DEC 1, [sorted+ecx]
+    PRINT_CHAR ' '
+    dec     ecx
+    cmp     ecx,    0
+    je      Q7MEDIA
+    jmp     Q7SORT
+    
+Q7MEDIA:
+    NEWLINE
+    ret
