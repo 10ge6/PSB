@@ -3,12 +3,17 @@ section .data
 
     frase db "Qual e a importancia da escola na democratizacao da sociedade", 0h
     
+    setadir db "->"
+    
 section .bss
 
     msg resb 41
     inv resb 41
     concat resb 41
     caps resb 41
+    numeros resb 41
+    letra resb 41
+    numero resb 41
     
 section .text
 global CMAIN
@@ -21,6 +26,7 @@ CMAIN:
     call Q3
     call Q4
     call Q5
+    call Q6
     
     ret
     
@@ -163,3 +169,37 @@ Q5FIM:
     PRINT_STRING caps
     NEWLINE
     ret
+
+Q6:
+   xor ebx, ebx
+   xor ecx, ecx
+   
+Q6INICIO:
+   cmp ecx, 41
+   je Q6FIM
+   cmp [msg + ecx], byte 20h
+   jne Q6MEIO
+   inc ecx
+   jmp Q6INICIO
+
+Q6MEIO:
+   mov al, [msg + ecx]
+   sub al, 96
+   mov [numeros+ebx],al
+   inc ebx
+   PRINT_CHAR [msg + ecx]
+   PRINT_CHAR " "
+   PRINT_CHAR "-"
+   PRINT_CHAR ">"
+   PRINT_CHAR " "
+   PRINT_DEC 1, al
+   NEWLINE
+   inc ecx
+   jmp Q6INICIO
+   
+Q6FIM:
+   ret    
+        
+                
+Q7:
+    xor eax,eax
