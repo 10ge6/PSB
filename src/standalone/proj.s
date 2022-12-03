@@ -114,18 +114,18 @@ Q5:
     xor     ebx,    ebx
     
 Q5UPPER:
-    cmp     ecx,    41
+    cmp     ecx,    41          ; checar por fim da string
     je      Q5FIM
     cmp     [msg+ecx], byte 20h ; char ' '?
-    je      Q5PULARESPACOU
-    mov     al,     [msg+ecx]
-    sub     al,     32
-    mov     [caps+ecx],   al
-    inc     ecx
-    inc     ebx
-    cmp     ebx,    2
+    je      Q5PULARESPACOU      ; queremos ignorar espacos
+    mov     al,     [msg+ecx]   ; buffer
+    sub     al,     32          ; converter para uppercase
+    mov     [caps+ecx],   al    ; buffer
+    inc     ecx                 ; counter posicao string
+    inc     ebx                 ; counter loop
+    cmp     ebx,    2           ; dois caracteres em uppercase por vez
     jne     Q5UPPER
-    xor     ebx,    ebx
+    xor     ebx,    ebx         ; a ser reutilizado para loop lowercase
     
 Q5LOWER:
     cmp     ecx,    41
@@ -136,7 +136,7 @@ Q5LOWER:
     mov     [caps+ecx],   al
     inc     ecx
     inc     ebx
-    cmp     ebx,    3
+    cmp     ebx,    3           ; desta vez sao tres caracteres por vez
     jne     Q5LOWER
     xor     ebx,    ebx
     jmp     Q5UPPER
