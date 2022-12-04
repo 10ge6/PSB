@@ -70,8 +70,10 @@ Q2DENOVOM:
     
 Q2FIM:
     PRINT_DEC 1,    bl
+    PRINT_STRING " 'a's"
     NEWLINE
     PRINT_DEC 1,    bh
+    PRINT_STRING " 'm's"
     NEWLINE
     ret
     
