@@ -46,7 +46,7 @@ Q2:
     xor     ebx,    ebx         ; nao utilizados no programa
     mov     ecx,    41          ; mesmo setup: comprimento de msg
     mov     edi,    msg         ; e seu pointer
-    mov     al,     'a'         ; compararemos primeiro contra 'a'
+    mov     al,     byte 61h    ; compararemos primeiro contra 'a'
     
 Q2DENOVOA:
     repne   scasb               ; percorre a string (repne termina quando ECX = 0; scasb le de EDI e compara contra EAX,
@@ -58,7 +58,7 @@ Q2DENOVOA:
     jmp     Q2DENOVOA
     
 Q2CONT:
-    mov     al,     'm'
+    mov     al,     byte 6dh    ; agora, contra 'm'
     mov     edi,    msg
     mov     ecx,    41
     
@@ -188,10 +188,10 @@ Q6MEIO:
    mov      [numeros+ebx], al
    inc      ebx
    PRINT_CHAR [msg + ecx]
-   PRINT_CHAR " "
-   PRINT_CHAR "-"
-   PRINT_CHAR ">"
-   PRINT_CHAR " "
+   PRINT_CHAR 20h               ; whitespace
+   PRINT_CHAR 2dh               ; '-'
+   PRINT_CHAR 3eh               ; '>'
+   PRINT_CHAR 20h
    PRINT_DEC 1,     al
    NEWLINE
    inc      ecx
@@ -230,7 +230,7 @@ Q7SETMAX:
     mov     edx,    [indice]
     mov     [numeros+edx], byte 0 ; temos o numero mais alto ja em sorted, o zeramos em numeros para encontrarmos o proximo mais alto
     PRINT_DEC 1, [sorted+ecx]   ; imprimir o numero mais alto da iteracao
-    PRINT_CHAR ' '
+    PRINT_CHAR 20h              ; whitespace
     cmp     ecx,    0
     je      Q7MEDIA             ; caso tenhamos percorrido o array inteiro, calcular media
     jmp     Q7SORT              ; retornar ao comeco do sort para mais uma iteracao
@@ -251,9 +251,9 @@ Q7ADD:
 Q7CALC:
     div     ecx
     PRINT_STRING "quociente: "
-    PRINT_DEC 4, eax
+    PRINT_DEC 1, eax
     NEWLINE
     PRINT_STRING "resto: "
-    PRINT_DEC 4, edx
+    PRINT_DEC 1, edx
     NEWLINE
     ret
