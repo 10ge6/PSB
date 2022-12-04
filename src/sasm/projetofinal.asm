@@ -1,7 +1,7 @@
 %include "io.inc"
 section .data
 
-    frase db "Qual e a importancia da escola na democratizacao da sociedade", 0h
+    ;frase db "Qual e a importancia da escola na democratizacao da sociedade", 0h
     
 section .bss
 
@@ -12,12 +12,15 @@ section .bss
     numeros resb 36
     sorted resb 36
     indice resb 1
+    frase resb 61
     
 section .text
 global CMAIN
 CMAIN:
 
     mov ebp, esp                ; for correct debugging
+    
+    GET_STRING frase, 61
     
     call Q1
     call Q2
