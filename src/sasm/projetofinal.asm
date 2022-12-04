@@ -3,11 +3,6 @@ section .data
 
     frase db "Qual e a importancia da escola na democratizacao da sociedade", 0h
     
-    setadir db "->"
-    
-    fst0 dw 0.0
-    fst1 dw 0.0
-    
 section .bss
 
     msg resb 41
@@ -16,13 +11,13 @@ section .bss
     caps resb 41
     numeros resb 36
     sorted resb 36
-    indice resw 1
+    indice resb 1
     
 section .text
 global CMAIN
 CMAIN:
 
-    mov ebp, esp; for correct debugging
+    mov ebp, esp                ; for correct debugging
     
     call Q1
     call Q2
@@ -36,11 +31,11 @@ CMAIN:
     
     
 Q1:
-    mov esi, frase + 7         ; offset para comecar em "a importancia..."
-    mov ecx, 41                ; comprimento ate "democratizacao"
-    mov edi, msg               ; comecar a copiar string no endereco msg
-    cld                        ; garantir DF em estado correto
-    rep movsb                  ; passar parte desejada da string
+    mov esi, frase + 7          ; offset para comecar em "a importancia..."
+    mov ecx, 41                 ; comprimento ate "democratizacao"
+    mov edi, msg                ; comecar a copiar string no endereco msg
+    cld                         ; garantir DF em estado correto
+    rep movsb                   ; passar parte desejada da string
     PRINT_STRING msg
     NEWLINE
     ret
@@ -130,18 +125,18 @@ Q5:
     xor     ebx,    ebx
     
 Q5UPPER:
-    cmp     ecx,    41
+    cmp     ecx,    41          ; checar por fim da string
     je      Q5FIM
     cmp     [msg+ecx], byte 20h ; char ' '?
-    je      Q5PULARESPACOU
-    mov     al,     [msg+ecx]
-    sub     al,     32
-    mov     [caps+ecx],   al
-    inc     ecx
-    inc     ebx
-    cmp     ebx,    2
+    je      Q5PULARESPACOU      ; queremos ignorar espacos
+    mov     al,     [msg+ecx]   ; buffer
+    sub     al,     32          ; converter para uppercase
+    mov     [caps+ecx],   al    ; buffer
+    inc     ecx                 ; counter posicao string
+    inc     ebx                 ; counter loop
+    cmp     ebx,    2           ; dois caracteres em uppercase por vez
     jne     Q5UPPER
-    xor     ebx,    ebx
+    xor     ebx,    ebx         ; a ser reutilizado para loop lowercase
     
 Q5LOWER:
     cmp     ecx,    41
@@ -152,7 +147,7 @@ Q5LOWER:
     mov     [caps+ecx],   al
     inc     ecx
     inc     ebx
-    cmp     ebx,    3
+    cmp     ebx,    3           ; desta vez sao tres caracteres por vez
     jne     Q5LOWER
     xor     ebx,    ebx
     jmp     Q5UPPER
@@ -189,7 +184,7 @@ Q6INICIO:
 
 Q6MEIO:
    mov      al,     [msg + ecx]
-   sub      al,     96
+   sub      al,     96          ; converter para numero
    mov      [numeros+ebx], al
    inc      ebx
    PRINT_CHAR [msg + ecx]
@@ -203,42 +198,42 @@ Q6MEIO:
    jmp      Q6INICIO
    
 Q6FIM:
-   ret    
+   ret
     
     
 Q7:
     xor     ebx,    ebx
-    mov     ecx,    36
+    mov     ecx,    36          ; comprimento do array de numeros
     jmp     Q7SORT
     
 Q7SORT:
-    dec     ecx
+    dec     ecx                 ; percorremos o array 36x, cada vez colocando o numero mais alto encontrado em ultimo no array sorted
     xor     eax,    eax
     xor     edx,    edx
 Q7STRITER:
-    cmp     edx,    36
+    cmp     edx,    36          ; checar se percorremos o array inteiro nesta iteracao
     je      Q7SETMAX
     mov     bl,     [numeros+edx]
-    cmp     bl,     al
+    cmp     bl,     al          ; checar se numero na posicao atual no array e maior que o em al
     jg      Q7SETBUF
 Q7AFTERSET:
-    inc     edx
+    inc     edx                 ; checar proximo numero no array
     jmp     Q7STRITER
     
 Q7SETBUF:
     mov     al,     bl
-    mov     [indice], edx
+    mov     [indice], edx       ; salvar indice de numero mais alto na iteracao atual
     jmp     Q7AFTERSET
     
 Q7SETMAX:
     mov     [sorted+ecx], al
     mov     edx,    [indice]
-    mov     [numeros+edx], byte 0
-    PRINT_DEC 1, [sorted+ecx]
+    mov     [numeros+edx], byte 0 ; temos o numero mais alto ja em sorted, o zeramos em numeros para encontrarmos o proximo mais alto
+    PRINT_DEC 1, [sorted+ecx]   ; imprimir o numero mais alto da iteracao
     PRINT_CHAR ' '
     cmp     ecx,    0
-    je      Q7MEDIA
-    jmp     Q7SORT
+    je      Q7MEDIA             ; caso tenhamos percorrido o array inteiro, calcular media
+    jmp     Q7SORT              ; retornar ao comeco do sort para mais uma iteracao
     
 Q7MEDIA:
     NEWLINE
@@ -250,7 +245,7 @@ Q7ADD:
     cmp     ecx,    36
     je      Q7CALC
     mov     bl,     [sorted+ecx]
-    add     eax,    ebx
+    add     eax,    ebx         ; somamos todos os numeros de sorted e guardamos o resultado em eax
     inc     ecx
     jmp     Q7ADD
 Q7CALC:
