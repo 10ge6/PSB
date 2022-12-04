@@ -5,6 +5,9 @@ section .data
     
     setadir db "->"
     
+    fst0 dw 0.0
+    fst1 dw 0.0
+    
 section .bss
 
     msg resb 41
@@ -209,10 +212,11 @@ Q7:
     jmp     Q7SORT
     
 Q7SORT:
+    dec     ecx
     xor     eax,    eax
     xor     edx,    edx
 Q7STRITER:
-    cmp     edx,    ecx
+    cmp     edx,    36
     je      Q7SETMAX
     mov     bl,     [numeros+edx]
     cmp     bl,     al
@@ -224,21 +228,37 @@ Q7AFTERSET:
 Q7SETBUF:
     mov     al,     bl
     mov     [indice], edx
-    ;PRINT_DEC 1, [indice]
     jmp     Q7AFTERSET
     
 Q7SETMAX:
     mov     [sorted+ecx], al
     mov     edx,    [indice]
-    mov     al,     [numeros+ecx]
-    mov     [numeros+edx], al
+    mov     [numeros+edx], byte 0
     PRINT_DEC 1, [sorted+ecx]
     PRINT_CHAR ' '
-    dec     ecx
     cmp     ecx,    0
     je      Q7MEDIA
     jmp     Q7SORT
     
 Q7MEDIA:
+    NEWLINE
+    xor     eax,    eax
+    xor     ebx,    ebx
+    xor     ecx,    ecx
+    xor     edx,    edx
+Q7ADD:
+    cmp     ecx,    36
+    je      Q7CALC
+    mov     bl,     [sorted+ecx]
+    add     eax,    ebx
+    inc     ecx
+    jmp     Q7ADD
+Q7CALC:
+    div     ecx
+    PRINT_STRING "quociente: "
+    PRINT_DEC 4, eax
+    NEWLINE
+    PRINT_STRING "resto: "
+    PRINT_DEC 4, edx
     NEWLINE
     ret
