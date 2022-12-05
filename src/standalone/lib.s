@@ -51,16 +51,44 @@ strecho:
     ret
 
 regprint:   ; printa conteudo de um registrador com valor entre 0-9
-    add     ecx,    48          ; conversao para ASCII 
+    add     ecx,    48          ; conversao para ASCII
+    cmp     ecx,    57
+    push    eax
+    push    ebx
+    push    edx	
+    jg      twochar
     mov     edx,    2           ; comprimento 2 (1 num + null terminator)
     push    ecx                 ; por no stack para passar pointer para imprimir
-    mov     [esp+1],byte 0Ah    ; inserir linefeed
-    mov     [esp+2],byte 0h     ; inserir null terminator
+    mov     [esp+1],byte 0h     ; inserir null terminator
     mov     ecx,    esp         ; passar pointer para imprimir
     mov     eax,    4           ; SYS_PRINT
     mov     ebx,    1           ; STDOUT
     int     80h                 ; syscall
     pop     ecx                 ; retomar ecx
+    pop     edx
+    pop     ebx
+    pop     eax
+    ret
+twochar:
+    mov     edx,    3
+    mov     eax,    48
+tens:
+    add     eax,    1
+    sub     ecx,    10
+    cmp     ecx,    57
+    jg      tens
+    push    eax
+    mov     [esp+1],ecx
+    mov     [esp+2],byte 0h
+    mov     ecx,    esp         ; passar pointer para imprimir
+    mov     eax,    4           ; SYS_PRINT
+    mov     ebx,    1           ; STDOUT
+    int     80h                 ; syscall
+    pop     eax
+    
+    pop     edx
+    pop     ebx
+    pop     eax
     ret
 
 ; void sysquit()
