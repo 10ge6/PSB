@@ -1,21 +1,19 @@
-; int slen(char message[])
 slen:
     push    ebx
-    mov     ebx, eax
+    mov     ebx,    eax
 
 nextchar:
-    cmp     byte [eax], 0
+    cmp     byte [eax], 0       ; null terminator
     jz      finished
     inc     eax
     jmp     nextchar
 
 finished:
-    sub     eax, ebx
+    sub     eax,    ebx
     pop     ebx
     ret
 
 
-; void sprint(char message[])
 sprint:
     push    edx
     push    ecx
@@ -23,12 +21,12 @@ sprint:
     push    eax
     call slen
 
-    mov     edx, eax
+    mov     edx,    eax
     pop     eax
 
-    mov     ecx, eax
-    mov     ebx, 1
-    mov     eax, 4
+    mov     ecx,    eax
+    mov     eax,    4           ; SYS_PRINT
+    mov     ebx,    1           ; STDOUT
     int     80h
 
     pop     ebx
@@ -37,22 +35,22 @@ sprint:
     ret
 
 
-; void strecho(char message[])
 strecho:
     call    sprint
 
     push    eax
-    mov     eax, 0Ah
+    mov     eax,    0Ah         ; '\n'
     push    eax
-    mov     eax, esp
+    mov     eax,    esp
     call    sprint
     pop     eax
     pop     eax
     ret
 
-regprint:   ; printa conteudo de um registrador com valor entre 0-9
+
+regprint:                       ; printa conteudo de um registrador com valor entre 0-99
     add     ecx,    48          ; conversao para ASCII
-    cmp     ecx,    57
+    cmp     ecx,    57          ; comparar com '9'
     push    eax
     push    ebx
     push    edx	
@@ -69,16 +67,16 @@ regprint:   ; printa conteudo de um registrador com valor entre 0-9
     pop     ebx
     pop     eax
     ret
-twochar:
+twochar:                        ; adaptar argumentos da syscall para +1 ao comprimento do print
     mov     edx,    3
     mov     eax,    48
-tens:
+tens:                           ; ecx-=10 ate chegar entre '0'-'9', eax+=1 (casa decimal)
     add     eax,    1
     sub     ecx,    10
     cmp     ecx,    57
     jg      tens
     push    eax
-    mov     [esp+1],ecx
+    mov     [esp+1],ecx         ; eax concat ecx para exibir resultado
     mov     [esp+2],byte 0h
     mov     ecx,    esp         ; passar pointer para imprimir
     mov     eax,    4           ; SYS_PRINT
@@ -91,9 +89,9 @@ tens:
     pop     eax
     ret
 
-; void sysquit()
+
 sysquit:
-    mov     ebx, 0
-    mov     eax, 1
-    int     80h
+    mov     ebx, 0              ; EXIT_SUCCESS
+    mov     eax, 1              ; SYS_EXIT
+    int     80h                 ; http://www.int80h.org/
     ret
